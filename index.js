@@ -28,6 +28,7 @@ async function run() {
 
     const menuCollection = client.db("bistroDb").collection("menu");
     const reviewCollection = client.db("bistroDb").collection("reviews");
+    const cartCollection = client.db("bistroDb").collection("carts");
 
     app.get('/menu', async(req, res) =>{
       const result = await menuCollection.find().toArray();
@@ -38,6 +39,14 @@ async function run() {
       const result = await reviewCollection.find().toArray();
       res.send(result);
     });
+
+    // cart collection
+    app.post('/carts', async(req, res) => {
+      const item = req.body;
+      console.log(item);
+      const result = await cartCollection.insertOne(item);
+      res.send(result);
+    })
 
 
     // Send a ping to confirm a successful connection
@@ -58,3 +67,16 @@ app.get('/', (req, res) => (
 app.listen(port, () => {
     console.log(`Bistro Restaurant is sitting on port ${port}`);
 })
+
+/*
+--------------------------------
+        Naming convention
+--------------------------------
+users: usersCollection -> we have a collection of users
+app.get('/users') - we want get all users    
+app.get('/users/:id') -> we want get a particular user
+app.post('/user') -> create a new user
+app.patch('/users/:id') -> update user     
+app.put('/users/:id') -> update user     
+app.delete('/users/:id') -> delete user     
+*/
