@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
-//middleware
+// middleware
 app.use(cors());
 app.use(express.json());
 
@@ -54,34 +54,34 @@ async function run() {
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
       });
-      console.log(token);
+      
       res.send({ token });
     });
 
     // warning: use verifyJWT before using verifyAdmin
-    const verifyAdmin = async(req, res) => {
-      const email = req.decoded.email;
-      const query = {email: email}
-      const user = await usersCollection.findOne(query);
-      if (user?.role !== 'admin') {
-        return res.send(403).send({error: true, message: 'Forbidden Message'});
-      }
-      next();
-    }
+    // const verifyAdmin = async(req, res) => {
+    //   const email = req.decoded.email;
+    //   const query = {email: email}
+    //   const user = await usersCollection.findOne(query);
+    //   if (user?.role !== 'admin') {
+    //     return res.send(403).send({error: true, message: 'Forbidden Message'});
+    //   }
+    //   next();
+    // }
 
     // users apis
-    app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
+    app.get("/users", async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
-    });
+    })
 
     app.post("/users", async (req, res) => {
       const user = req.body;
-      const query = { email: user.email };
+      const query = { email: user.email }
       const existingUser = await usersCollection.findOne(query);
 
       if (existingUser) {
-        return res.send({ message: "user already exist" });
+        return res.send({ message: "user already exist" })
       }
       const result = await usersCollection.insertOne(user);
       res.send(result);
@@ -110,12 +110,12 @@ async function run() {
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
-          role: "admin",
+          role: "admin"
         },
       };
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result);
-    });
+    })
 
     app.delete("/users/admin/:id", async (req, res) => {
       const id = req.params.id;
@@ -128,13 +128,13 @@ async function run() {
     app.get("/menu", async (req, res) => {
       const result = await menuCollection.find().toArray();
       res.send(result);
-    });
+    })
 
     // review apis
     app.get("/reviews", async (req, res) => {
       const result = await reviewCollection.find().toArray();
       res.send(result);
-    });
+    })
 
     // cart collection api
     app.get("/carts", verifyJWT, async (req, res) => {
@@ -146,7 +146,7 @@ async function run() {
 
       const decodedEmail = req.decoded.email;
       if (email !== decodedEmail) {
-        return res.send(403).send({ error: true, message: "Forbidden Access" });
+        return res.send(403).send({ error: true, message: "Forbidden Access" })
       }
 
       const query = { email: email };
@@ -158,14 +158,14 @@ async function run() {
       const item = req.body;
       const result = await cartCollection.insertOne(item);
       res.send(result);
-    });
+    })
 
     app.delete("/carts/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await cartCollection.deleteOne(query);
       res.send(result);
-    });
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
@@ -182,9 +182,8 @@ run().catch(console.dir);
 app.get("/", (req, res) => res.send("bistro restaurant is running"));
 
 app.listen(port, () => {
-  console.log(`Bistro Restaurant is sitting on port ${port}`);
-});
-
+  console.log(`Bistro boss is sitting on port ${port}`);
+})
 /*
 --------------------------------
         Naming convention
