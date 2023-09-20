@@ -58,8 +58,19 @@ async function run() {
       res.send({ token });
     });
 
+    // warning: use verifyJWT before using verifyAdmin
+    const verifyAdmin = async(req, res) => {
+      const email = req.decoded.email;
+      const query = {email: email}
+      const user = await usersCollection.findOne(query);
+      if (user?.role !== 'admin') {
+        return res.send(403).send({error: true, message: 'Forbidden Message'});
+      }
+      next();
+    }
+
     // users apis
-    app.get("/users", async (req, res) => {
+    app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
