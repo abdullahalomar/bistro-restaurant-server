@@ -49,7 +49,7 @@ async function run() {
     const reviewCollection = client.db("bistroDb").collection("reviews");
     const cartCollection = client.db("bistroDb").collection("carts");
 
-    app.post("/jwt", (req, res) => {
+    app.post('/jwt', (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
@@ -93,8 +93,8 @@ async function run() {
     // 3. check admin
     app.get('/users/admin/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
-
-      if (req.decoded.email !== email) {
+      const decodedEmail = req.decoded.email;
+      if (email !== decodedEmail) {
         res.send({ admin: false })
       }
 
