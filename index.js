@@ -148,6 +148,22 @@ async function run() {
       res.send(result);
     })
 
+
+    app.delete('/menu/:id', verifyJWT, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await menuCollection.deleteOne(query);
+      res.send(result);
+      
+    })
+
+    // app.delete('/menu/:id', verifyJWT, verifyAdmin, async(req, res) =>{
+    //   const id = req.params.id;
+    //   const query = {_id: new ObjectId(id)}
+    //   const result = await menuCollection.deleteOne(query);
+    //   res.send(result);
+    // })
+
     // review collection api
     app.get('/review', async(req, res) => {
         const result = await reviewCollection.find().toArray();
