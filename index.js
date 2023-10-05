@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const nodemailer = require("nodemailer");
 require('dotenv').config()
 const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY);
 const port = process.env.PORT || 5000;
@@ -9,6 +10,41 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(cors());
 app.use(express.json());
+
+
+
+let transporter = nodemailer.createTransport({
+  host: 'smtp.sendgrid.net',
+  port: 587,
+  auth: {
+      user: "apikey",
+      pass: process.env.SENDGRID_API_KEY
+  }
+})
+
+
+// send payment confirmation email
+const sendPaymentConfirmationEmail = payment => {
+  transporter.sendMail({
+    from: "Bistro Restaurant", // verified sender email
+    to: payment.email, // recipient email
+    subject: "Your Order is confirmed. Enjoy the food.", // Subject line
+    text: "Hello world!", // plain text body
+    html: `
+    <div>
+    <h2>Payment Confirmed!!</h2>
+    </div>
+    `, // html body
+  }, function(error, info){
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+ 
+}
+
 
 // verify jwt
 const verifyJWT = (req, res, next) => {
@@ -214,6 +250,7 @@ async function run() {
         });
     })
 
+
     // payment collection api
     app.post('/payments', verifyJWT, async(req, res) => {
         const payment = req.body;
@@ -221,6 +258,9 @@ async function run() {
 
         const query = {_id: { $in: payment.cartItems.map(id => new ObjectId(id)) }}
         const deleteResult = await cartCollection.deleteMany(query)
+
+        // send an email confirming payment
+        sendPaymentConfirmationEmail(payment)
 
         res.send({insertResult, deleteResult});
     })
